@@ -1,35 +1,63 @@
+import java.util.ArrayList;
+
+
 public class Polynomial {
-    double[] coefficients;
+    ArrayList<Double> coefficients = new ArrayList<Double>();
+    ArrayList<Integer> exponents = new ArrayList<Integer>();
 
-    public Polynomial() {
-        coefficients = new double[1];
-        coefficients[0] = 0;
-    }
+    public Polynomial() {}
 
-    public Polynomial(double[] coefficients) {
-        this.coefficients = coefficients.clone();
+    public Polynomial(ArrayList<Double> coefficients, ArrayList<Integer> exponents) {
+        this.coefficients.addAll(coefficients);
+        this.exponents.addAll(exponents);
     }
 
     public Polynomial add(Polynomial polynomial) {
-        double[] poly1 = coefficients.clone();
-        double[] poly2 = polynomial.coefficients.clone();
-        if (poly1.length > poly2.length) {
-            for (int i = 0; i < poly1.length; i++) {
-                if (i < poly2.length) poly1[i] += poly2[i];
+        Polynomial sum = new Polynomial(polynomial.coefficients, polynomial.exponents);
+
+        for (int i = 0; i < exponents.size(); i++) {
+            if (sum.exponents.contains(exponents.get(i))) {
+                sum.coefficients.set(i, sum.coefficients.get(i) + coefficients.get(i));
+                if (sum.coefficients.get(i) == 0) {
+                    sum.coefficients.remove(i);
+                    sum.exponents.remove(i);
+                }
+            } else {
+                sum.coefficients.add(coefficients.get(i));
+                sum.exponents.add(exponents.get(i));
             }
-            return new Polynomial(poly1);
-        } else {
-            for (int i = 0; i < poly2.length; i++) {
-                if (i < poly1.length) poly2[i] += poly1[i];
-            }
-            return new Polynomial(poly2);
         }
+
+        return sum;
+    }
+
+    public Polynomial multiply(Polynomial polynomial) {
+        Polynomial product = new Polynomial();
+        for (int i = 0; i < coefficients.size(); i++) {
+            for (int j = 0; j < polynomial.coefficients.size(); j++) {
+                int exp = exponents.get(i) + polynomial.exponents.get(j);
+                double coeff = coefficients.get(i) * polynomial.coefficients.get(j);
+
+                if (product.exponents.contains(exp)) {
+                    product.coefficients.set(product.exponents.indexOf(exp), product.coefficients.get(product.exponents.indexOf(exp)) + coeff);
+                    if (product.coefficients.get(product.exponents.indexOf(exp)) == 0) {
+                        product.coefficients.remove(product.exponents.indexOf(exp));
+                        product.exponents.remove(product.exponents.indexOf(exp));
+                    }
+                } else {
+                    product.exponents.add(exp);
+                    product.coefficients.add(coeff);
+                }
+            }
+        }
+
+        return product;
     }
 
     public double evaluate(double x) {
         double result = 0;
-        for (int i = 0; i < coefficients.length; i++) {
-            result += coefficients[i] * Math.pow(x, i);
+        for (int i = 0; i < coefficients.size(); i++) {
+            result += coefficients.get(i) * Math.pow(x, exponents.get(i));
         }
         return result;
     }
@@ -37,4 +65,6 @@ public class Polynomial {
     public boolean hasRoot(double x) {
         return evaluate(x) == 0;
     }
+
+
 }
