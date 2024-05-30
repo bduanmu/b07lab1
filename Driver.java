@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.io.*;
+
 
 public class Driver {
     public static void main(String[] args) {
@@ -55,5 +57,13 @@ public class Driver {
             System.out.println("1 is a root of s");
         else
             System.out.println("1 is not a root of s");
+
+        Polynomial filePoly = new Polynomial(new File("ExamplePoly.txt"));
+
+        for(int i = 0; i < filePoly.coefficients.size(); i++) {
+            System.out.print(filePoly.coefficients.get(i) + "x^" + filePoly.exponents.get(i) + " + ");
+        }
+
+        filePoly.saveToFile("Output.txt");
     }
 }

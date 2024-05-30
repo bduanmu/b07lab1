@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.*;
 
 
 public class Polynomial {
@@ -10,6 +12,91 @@ public class Polynomial {
     public Polynomial(ArrayList<Double> coefficients, ArrayList<Integer> exponents) {
         this.coefficients.addAll(coefficients);
         this.exponents.addAll(exponents);
+    }
+
+    public Polynomial(File polynomial) {
+        try {
+            Scanner sc = new Scanner(polynomial);
+            String polyString = sc.nextLine();
+            String coeff = "";
+            String exp = "";
+            boolean isCoeff = true;
+            char[] poly = polyString.toCharArray();
+
+            for(int i = 0; i < poly.length; i++) {
+                char ch = poly[i];
+                if (ch == '-') {
+                    if (this.coefficients.size() != 0) {
+                        if (coeff.equals("")) {
+                            coeff = "1";
+                        } else if (coeff.equals("-")) {
+                            coeff = "-1";
+                        }
+
+                        if (exp.equals("")) {
+                            if (isCoeff) {
+                                exp = "0";
+                            } else {
+                                exp = "1";
+                            }
+                        }
+
+                        this.coefficients.add(Double.parseDouble(coeff));
+                        this.exponents.add(Integer.parseInt(exp));
+                    }
+
+                    isCoeff = true;
+                    coeff = "-";
+                    exp = "";
+                } else if (ch == '+') {
+                    if (coeff.equals("")) {
+                        coeff = "1";
+                    } else if (coeff.equals("-")) {
+                        coeff = "-1";
+                    }
+
+                    if (exp.equals("")) {
+                        if (isCoeff) {
+                            exp = "0";
+                        } else {
+                            exp = "1";
+                        }
+                    }
+
+                    this.coefficients.add(Double.parseDouble(coeff));
+                    this.exponents.add(Integer.parseInt(exp));
+                    isCoeff = true;
+                    coeff = "";
+                    exp = "";
+                } else if (ch == 'x') {
+                    isCoeff = false;
+                } else if (isCoeff) {
+                    coeff = coeff + ch;
+                } else {
+                    exp = exp + ch;
+                }
+            }
+
+            if (coeff.equals("")) {
+                coeff = "1";
+            } else if (coeff.equals("-")) {
+                coeff = "-1";
+            }
+
+            if (exp.equals("")) {
+                if (isCoeff) {
+                    exp = "0";
+                } else {
+                    exp = "1";
+                }
+            }
+
+            this.coefficients.add(Double.parseDouble(coeff));
+            this.exponents.add(Integer.parseInt(exp));
+            sc.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Error");
+        }
     }
 
     public Polynomial add(Polynomial polynomial) {
@@ -66,5 +153,38 @@ public class Polynomial {
         return evaluate(x) == 0;
     }
 
+    public void saveToFile(String fileName) {
+        try {
+            String polynomial = "";
 
+            for(int i = 0; i < this.coefficients.size(); i++) {
+                if ((Double)this.coefficients.get(i) == 1.0D) {
+                    polynomial = polynomial + "+";
+                } else if ((Double)this.coefficients.get(i) == -1.0D) {
+                    polynomial = polynomial + "-";
+                } else if ((Double)this.coefficients.get(i) < 0.0D) {
+                    polynomial = polynomial + this.coefficients.get(i);
+                } else {
+                    polynomial = polynomial + "+" + this.coefficients.get(i);
+                }
+
+                if ((Integer)this.exponents.get(i) != 0) {
+                    polynomial = polynomial + "x";
+                    if ((Integer)this.exponents.get(i) != 1) {
+                        polynomial = polynomial + this.exponents.get(i);
+                    }
+                }
+            }
+
+            if (polynomial.substring(0, 1).equals("+")) {
+                polynomial = polynomial.substring(1);
+            }
+
+            FileWriter writer = new FileWriter(fileName);
+            writer.write(polynomial);
+            writer.close();
+        } catch (IOException ex) {
+            System.out.println("Error");
+        }
+    }
 }
